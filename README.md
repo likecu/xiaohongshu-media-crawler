@@ -14,20 +14,34 @@
 
 ```
 .
-├── clean_json_files.py      # 清理JSON文件中的敏感字段
-├── mcp_utils.py             # MCP工具调用和公共函数
-├── html_generator.py        # HTML生成工具
-├── base_crawler.py          # 爬虫基类
-├── simple_xhs_crawler.py    # 简单爬虫实现
-├── multi_keyword_crawler.py # 多关键词爬虫实现
-├── xhs_interview_crawler.py # 面试经验爬虫实现
-├── generate_complete_html.py # 生成完整HTML
-├── generate_html_from_existing.py # 从现有数据生成HTML
-├── summarize_posts.py       # 帖子总结
-├── search_config.json       # 搜索配置
-├── mcp-config.json          # MCP配置
-├── xhs_tools.json           # 小红书工具配置
-└── .gitignore               # Git忽略文件
+├── xhs_crawler/             # 爬虫主目录
+│   ├── cleaners/            # 清理工具
+│   │   ├── __init__.py
+│   │   └── clean_json_files.py      # 清理JSON文件中的敏感字段
+│   ├── core/                # 核心模块
+│   │   ├── __init__.py
+│   │   ├── base_crawler.py          # 爬虫基类
+│   │   ├── config.py                # 配置文件
+│   │   └── mcp_utils.py             # MCP工具调用和公共函数
+│   ├── crawlers/            # 爬虫实现
+│   │   ├── __init__.py
+│   │   ├── multi_keyword_crawler.py # 多关键词爬虫实现
+│   │   ├── simple_xhs_crawler.py    # 简单爬虫实现
+│   │   └── xhs_interview_crawler.py # 面试经验爬虫实现
+│   ├── generators/          # HTML生成工具
+│   │   ├── __init__.py
+│   │   ├── generate_complete_html.py # 生成完整HTML
+│   │   ├── generate_html_from_existing.py # 从现有数据生成HTML
+│   │   └── html_generator.py        # HTML生成工具
+│   └── summarizers/         # 帖子总结
+│       ├── __init__.py
+│       └── summarize_posts.py       # 帖子总结
+├── .gitignore               # Git忽略文件
+├── README.md                # 项目说明文档
+├── get_hotel_reviews        # 酒店评论获取脚本
+├── start_mcp_service.sh     # 启动MCP服务脚本
+├── stop_mcp_service.sh      # 停止MCP服务脚本
+└── 小红书登录指南.md          # 小红书登录指南
 ```
 
 ## 模块说明
@@ -67,36 +81,43 @@ pip install -r requirements.txt
 
 ```bash
 # 运行简单爬虫
-python3 simple_xhs_crawler.py
+python3 -m xhs_crawler.crawlers.simple_xhs_crawler
 
 # 运行多关键词爬虫
-python3 multi_keyword_crawler.py
+python3 -m xhs_crawler.crawlers.multi_keyword_crawler
 
 # 运行面试经验爬虫
-python3 xhs_interview_crawler.py
+python3 -m xhs_crawler.crawlers.xhs_interview_crawler
 ```
 
 ### 3. 清理JSON文件
 
 ```bash
 # 清理当前目录下的所有JSON文件
-python3 clean_json_files.py
+python3 -m xhs_crawler.cleaners.clean_json_files
 
 # 清理指定目录下的所有JSON文件
-python3 clean_json_files.py /path/to/directory
+python3 -m xhs_crawler.cleaners.clean_json_files /path/to/directory
 
 # 使用自定义敏感字段列表清理JSON文件
-python3 clean_json_files.py /path/to/directory field1,field2
+python3 -m xhs_crawler.cleaners.clean_json_files /path/to/directory field1,field2
 ```
 
 ### 4. 生成HTML页面
 
 ```bash
 # 生成完整HTML
-python3 generate_complete_html.py
+python3 -m xhs_crawler.generators.generate_complete_html
 
 # 从现有数据生成HTML
-python3 generate_html_from_existing.py
+python3 -m xhs_crawler.generators.generate_html_from_existing
+```
+
+### 5. 帖子总结
+
+```bash
+# 运行帖子总结脚本
+python3 -m xhs_crawler.summarizers.summarize_posts
 ```
 
 ## 隐私保护

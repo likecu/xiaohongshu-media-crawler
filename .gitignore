@@ -6,11 +6,17 @@ __pycache__/
 # 测试结果
 xhs_search_results.json
 大模型面试帖子/
+大模型面试帖子_all/
+final/
+final_answersearch_travel_guide/
+get_hotel_reviews/
+recommend_hotels/
 
 # 虚拟环境
 venv/
 env/
 *.venv/
+/Volumes/600g/app1/okx-py/
 
 # 日志文件
 *.log
@@ -20,6 +26,11 @@ logs/
 .env
 .env.local
 .env.*.local
+*.pem
+mcp-config.json
+search_config.json
+xhs_tools.json
+clean_config.json
 
 # IDE
 .vscode/
@@ -42,3 +53,15 @@ build/
 
 # 嵌入的git仓库
 media-crawler-mcp-service/
+
+# OCR相关
+/Volumes/600g/app1/doubao获取/
+
+# 生成的HTML文件
+*.html
+
+# 爬虫生成的JSON文件
+*_detail.json
+*_posts.json
+all_search_results.json
+原始搜索结果.json
