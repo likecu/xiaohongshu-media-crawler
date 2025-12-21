@@ -9,19 +9,52 @@
 3. 从配置文件读取爬取参数
 4. 运行爬虫
 5. 处理爬取结果
+6. HTML生成功能
+7. 帖子总结功能
 """
 
 import json
 import os
+import time
 from typing import List, Dict, Any
 from xhs_crawler.crawlers.multi_keyword_crawler import MultiKeywordCrawler
+from xhs_crawler.generators.generate_complete_html import CompleteHtmlGenerator
+from xhs_crawler.generators.generate_html_from_existing import ExistingHtmlGenerator
+import subprocess
 
+def print_menu():
+    """
+    打印功能菜单
+    """
+    print("=" * 60)
+    print("🎯 小红书爬虫与分析工具套件")
+    print("=" * 60)
+    print("1. 🔍 运行多关键词爬虫")
+    print("   - 从配置文件读取搜索关键词")
+    print("   - 爬取指定页数的小红书内容")
+    print("   - 保存爬取结果到本地")
+    print()
+    print("2. 📄 从搜索结果生成完整HTML")
+    print("   - 加载搜索结果和帖子详情")
+    print("   - 生成包含完整帖子信息的HTML网页")
+    print()
+    print("3. 📂 从现有数据生成HTML")
+    print("   - 从已有的搜索结果文件生成HTML")
+    print("   - 支持多种搜索结果文件格式")
+    print()
+    print("4. 📝 对帖子内容进行总结")
+    print("   - 使用gemini_ocr.py对帖子内容进行OCR识别")
+    print("   - 对帖子内容进行总结")
+    print("   - 生成包含总结的HTML网页")
+    print()
+    print("0. 🚪 退出程序")
+    print("=" * 60)
 
-def main():
+def run_multi_keyword_crawler():
     """
-    主函数，演示多关键词爬虫的完整流程
+    运行多关键词爬虫
     """
-    print("🎯 小红书多关键词爬虫示例")
+    print("\n🎯 小红书多关键词爬虫示例")
     print("=" * 50)
     
     # 1. 初始化爬虫
@@ -66,7 +99,112 @@ def main():
         print("💡 提示: 请检查网络连接、MCP服务是否正常运行")
     
     print("\n" + "=" * 50)
-    print("🎉 示例演示结束")
+    print("🎉 爬虫演示结束")
+
+def generate_complete_html():
+    """
+    从搜索结果生成完整HTML
+    """
+    print("\n📄 从搜索结果生成完整HTML")
+    print("=" * 50)
+    
+    try:
+        generator = CompleteHtmlGenerator()
+        generator.run()
+    except Exception as e:
+        print(f"\n❌ 生成HTML过程中出现错误: {e}")
+        print("💡 提示: 请确保已运行爬虫并生成了搜索结果")
+    
+    print("\n" + "=" * 50)
+    print("🎉 HTML生成演示结束")
+
+def generate_html_from_existing():
+    """
+    从现有数据生成HTML
+    """
+    print("\n📂 从现有数据生成HTML")
+    print("=" * 50)
+    
+    try:
+        generator = ExistingHtmlGenerator()
+        generator.run()
+    except Exception as e:
+        print(f"\n❌ 生成HTML过程中出现错误: {e}")
+        print("💡 提示: 请确保已运行爬虫并生成了搜索结果")
+    
+    print("\n" + "=" * 50)
+    print("🎉 现有数据HTML生成演示结束")
+
+def summarize_posts():
+    """
+    对帖子内容进行总结
+    """
+    print("\n📝 对帖子内容进行总结")
+    print("=" * 50)
+    
+    try:
+        # 调用summarize_posts.py脚本
+        script_path = os.path.join("xhs_crawler", "summarizers", "summarize_posts.py")
+        if os.path.exists(script_path):
+            print(f"🔍 执行脚本: {script_path}")
+            result = subprocess.run(
+                ["python3", script_path],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=300  # 设置5分钟超时
+            )
+            print(result.stdout)
+            if result.stderr:
+                print(f"\n❌ 脚本执行错误: {result.stderr}")
+        else:
+            print(f"❌ 脚本文件不存在: {script_path}")
+    except subprocess.TimeoutExpired:
+        print("\n❌ 脚本执行超时")
+    except Exception as e:
+        print(f"\n❌ 总结过程中出现错误: {e}")
+        print("💡 提示: 请确保gemini_ocr.py工具路径正确且可执行")
+    
+    print("\n" + "=" * 50)
+    print("🎉 帖子总结演示结束")
+
+def main():
+    """
+    主函数，按顺序执行所有功能
+    """
+    print("🎯 小红书爬虫与分析工具套件 - 自动执行模式")
+    print("=" * 60)
+    print("程序将按顺序执行以下功能：")
+    print("1. 🔍 运行多关键词爬虫")
+    print("2. 📄 从搜索结果生成完整HTML")
+    print("3. 📂 从现有数据生成HTML")
+    print("4. 📝 对帖子内容进行总结")
+    print("=" * 60)
+    
+    # 按顺序执行所有功能
+    print("\n\n" + "=" * 60)
+    print("开始执行功能 1: 🔍 运行多关键词爬虫")
+    print("=" * 60)
+    run_multi_keyword_crawler()
+    
+    print("\n\n" + "=" * 60)
+    print("开始执行功能 2: 📄 从搜索结果生成完整HTML")
+    print("=" * 60)
+    generate_complete_html()
+    
+    print("\n\n" + "=" * 60)
+    print("开始执行功能 3: 📂 从现有数据生成HTML")
+    print("=" * 60)
+    generate_html_from_existing()
+    
+    print("\n\n" + "=" * 60)
+    print("开始执行功能 4: 📝 对帖子内容进行总结")
+    print("=" * 60)
+    summarize_posts()
+    
+    print("\n\n" + "=" * 60)
+    print("🎉 所有功能执行完成！")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
