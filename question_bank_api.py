@@ -304,6 +304,59 @@ def crawl_questions():
         }), 500
 
 
+@app.route('/api/question-bank/crawl', methods=['POST'])
+def crawl_questions_by_keyword():
+    """
+    根据关键词从小红书抓取题目（前端刷题页面调用）
+    
+    Request Body:
+        keyword (str): 搜索关键词
+        max_pages (int): 最大爬取页数（默认2）
+        page_size (int): 每页返回数量（默认10）
+        
+    Returns:
+        JSON: 抓取结果
+    """
+    bank = get_bank()
+    
+    data = request.get_json() or {}
+    keyword = data.get('keyword', '').strip()
+    max_pages = data.get('max_pages', 2)
+    page_size = data.get('page_size', 10)
+    
+    if not keyword:
+        return jsonify({
+            "code": -1,
+            "message": "请输入搜索关键词"
+        }), 400
+    
+    try:
+        keywords = [keyword]
+        
+        import asyncio
+        new_questions = asyncio.run(
+            bank.crawl_questions(keywords=keywords, pages_per_keyword=max_pages)
+        )
+        
+        asyncio.run(bank.categorize_questions())
+        bank.save()
+        
+        return jsonify({
+            "code": 0,
+            "message": "爬取成功",
+            "data": {
+                "crawled_count": len(new_questions),
+                "total_count": len(bank.questions),
+                "keyword": keyword
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "code": -1,
+            "message": f"爬取失败: {str(e)}"
+        }), 500
+
+
 @app.route('/api/categorize', methods=['POST'])
 def categorize_questions():
     """

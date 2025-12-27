@@ -10,6 +10,62 @@
 4. 生成HTML网页展示所有帖子
 5. 清理JSON文件中的敏感信息
 
+## 远程服务器配置
+
+### 服务器连接信息
+
+| 项目 | 值 |
+|------|-----|
+| 服务器地址 | 34.29.5.105 |
+| 用户名 | milk |
+| SSH密钥 | ~/.ssh/milk |
+| 远程项目目录 | /root/python-okx/python-okx |
+
+连接命令：
+```bash
+ssh -i ~/.ssh/milk milk@34.29.5.105
+```
+
+### 数据库配置
+
+| 项目 | 值 |
+|------|-----|
+| 数据库类型 | MySQL |
+| 密码 | !A33b3e561fec |
+
+### 数据同步方式
+
+1. 本地开发完成后，通过GitHub同步代码到远程服务器
+2. 远程服务器密码修改需要直接连接服务器进行修改
+3. 同步命令（在远程服务器执行）：
+   ```bash
+   cd /root/python-okx/python-okx
+   git pull origin main
+   ```
+
+## 本地开发环境
+
+### Python环境
+
+项目使用虚拟环境进行依赖管理：
+
+| 环境 | Python版本 | 路径 |
+|------|-----------|------|
+| 主环境 | 3.9 | /Volumes/600g/app1/okx-py/bin/python |
+| 辅助环境 | 3.13.2 | /Users/aaa/python-sdk/python3.13.2/bin/python |
+
+### 快速启动
+
+```bash
+# 使用主Python环境运行示例
+/Volumes/600g/app1/okx-py/bin/python3 example.py
+```
+
+## GitHub仓库
+
+- 仓库地址：https://github.com/likecu
+- 代码同步：本地提交后推送到GitHub，远程服务器从GitHub拉取更新
+
 ## 项目结构
 
 ```
@@ -61,6 +117,82 @@
 - **generate_complete_html.py**: 生成完整的HTML页面
 - **generate_html_from_existing.py**: 从现有数据生成HTML页面
 - **summarize_posts.py**: 对帖子进行总结
+
+## 常用搜索接口
+
+### 默认搜索配置
+
+项目的搜索配置文件为 `search_config.json`，当前配置包含以下搜索关键词：
+
+| 分类 | 搜索关键词 | 用途 |
+|------|-----------|------|
+| 面试经验 | 大模型面试 经验分享 | 获取大模型面试经验分享 |
+| 面试技巧 | 大模型面试技巧 | 获取大模型面试技巧 |
+
+### 常用搜索关键词列表
+
+#### 1. 刷题相关
+| 搜索关键词 | 说明 |
+|-----------|------|
+| leetcode 刷题 | LeetCode刷题经验 |
+| 算法刷题 | 算法刷题技巧 |
+| 刷题路线 | 刷题学习路线 |
+| 刷题顺序 | 刷题顺序建议 |
+| 题目分类 | 题目分类整理 |
+
+#### 2. 面试相关
+| 搜索关键词 | 说明 |
+|-----------|------|
+| 面试经验 | 面试经验分享 |
+| 面试题 | 面试题目汇总 |
+| 面试技巧 | 面试技巧总结 |
+| 面试准备 | 面试准备攻略 |
+| 算法面试 | 算法面试题目 |
+| 编程面试 | 编程面试经验 |
+
+#### 3. 大模型相关
+| 搜索关键词 | 说明 |
+|-----------|------|
+| 大模型面试 | 大模型岗位面试 |
+| LLM面试 | 大语言模型面试 |
+| AI面试 | AI岗位面试 |
+| 机器学习面试 | 机器学习面试 |
+| 深度学习面试 | 深度学习面试 |
+
+#### 4. 触发更新关键词
+| 搜索关键词 | 说明 |
+|-----------|------|
+| 更新 | 获取最新内容 |
+| 2024 | 获取2024年内容 |
+| 2025 | 获取2025年内容 |
+| 最新 | 获取最新分享 |
+| 总结 | 获取总结类内容 |
+
+### 自定义搜索配置
+
+修改 `search_config.json` 文件来自定义搜索：
+
+```json
+{
+  "search_terms": [
+    "大模型面试 经验分享",
+    "大模型面试技巧",
+    "leetcode 刷题",
+    "算法面试",
+    "面试经验"
+  ],
+  "page_num": 2,
+  "page_size": 20
+}
+```
+
+### 搜索参数说明
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| search_terms | 搜索关键词列表 | - |
+| page_num | 爬取页数 | 2 |
+| page_size | 每页数量 | 20 |
 
 ## 配置文件
 
@@ -118,6 +250,100 @@ python3 -m xhs_crawler.generators.generate_html_from_existing
 ```bash
 # 运行帖子总结脚本
 python3 -m xhs_crawler.summarizers.summarize_posts
+```
+
+## 远程部署
+
+### 1. 连接到远程服务器
+
+```bash
+ssh -i ~/.ssh/milk milk@34.29.5.105
+```
+
+### 2. 同步代码
+
+在本地开发完成后，推送代码到GitHub，然后在远程服务器上拉取：
+
+```bash
+# 远程服务器上执行
+cd /root/python-okx/python-okx
+git pull origin main
+```
+
+### 3. 部署MCP服务
+
+```bash
+# 检查media-crawler-mcp-service目录
+cd /root/python-okx/python-okx/media-crawler-mcp-service
+
+# 启动MCP服务
+docker compose up -d
+
+# 验证服务状态
+docker compose ps
+```
+
+### 4. 远程服务器上运行爬虫
+
+```bash
+# 安装依赖
+cd /root/python-okx/python-okx
+pip install -r requirements.txt
+
+# 运行爬虫
+python3 -m xhs_crawler.crawlers.xhs_interview_crawler
+
+# 清理敏感信息
+python3 -m xhs_crawler.cleaners.clean_json_files
+
+# 生成HTML
+python3 -m xhs_crawler.generators.generate_complete_html
+```
+
+### 5. 小红书登录配置
+
+详细登录方式请参考 [小红书登录指南](./小红书登录指南.md)
+
+支持的登录方式：
+- 管理界面登录
+- API登录（二维码/Cookie）
+
+### 6. 验证部署
+
+- 检查MCP服务是否正常运行
+- 测试爬虫功能是否正常
+- 验证生成的HTML页面是否可访问
+
+## 常用命令速查
+
+### 本地开发
+
+```bash
+# 运行示例
+/Volumes/600g/app1/okx-py/bin/python3 example.py
+
+# 运行爬虫（使用主环境）
+/Volumes/600g/app1/okx-py/bin/python3 -m xhs_crawler.crawlers.xhs_interview_crawler
+
+# 运行爬虫（使用辅助环境）
+/Users/aaa/python-sdk/python3.13.2/bin/python3 -m xhs_crawler.crawlers.xhs_interview_crawler
+```
+
+### 远程服务器
+
+```bash
+# SSH连接
+ssh -i ~/.ssh/milk milk@34.29.5.105
+
+# Git同步
+cd /root/python-okx/python-okx && git pull origin main
+
+# MCP服务管理
+cd /root/python-okx/python-okx/media-crawler-mcp-service
+docker compose up -d    # 启动
+docker compose down     # 停止
+docker compose ps       # 查看状态
+docker compose logs -f  # 查看日志
 ```
 
 ## 隐私保护

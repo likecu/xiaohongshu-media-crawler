@@ -8,6 +8,7 @@ import os
 import json
 from typing import List, Dict, Any, Optional
 from xhs_crawler.core.mcp_utils import MCPUtils, ensure_directory, save_json_data, clean_filename
+from xhs_crawler.core.ai_utils import AIUtils
 from xhs_crawler.generators.html_generator import generate_html
 
 
@@ -24,6 +25,7 @@ class BaseCrawler:
             output_dir: 输出目录
         """
         self.mcp_utils = MCPUtils()
+        self.ai_utils = AIUtils()
         self.output_dir = output_dir
         self.detail_dir = os.path.join(output_dir, "详情")
         self.ensure_output_dirs()
@@ -89,7 +91,13 @@ class BaseCrawler:
             print(f"❌ 获取帖子详情失败: {result.get('msg')}")
             return {}
         
-        return result.get("data", {})
+        data = result.get("data", {})
+        notes = data.get("notes", [])
+        
+        if notes:
+            return notes[0]
+        
+        return {}
     
     def get_post_comments(self, note_id: str, xsec_token: str, page_num: int = 1, page_size: int = 20) -> List[Dict[str, Any]]:
         """
@@ -150,9 +158,22 @@ class BaseCrawler:
             )
             
             if detail:
+                # 3. 使用 AI 进行内容分析
+                print(f"🧠 使用 AI 分析内容...")
+                content = detail.get("desc", "")
+                title = note.get("title", "")
+                images = detail.get("imageList", [])
+                
+                enhanced_summary = self.ai_utils.summarize_content_enhanced(
+                    content=content,
+                    title=title,
+                    images=images
+                )
+                
                 post = {
                     "basic_info": note,
-                    "detail": detail
+                    "detail": detail,
+                    "enhanced_summary": enhanced_summary
                 }
                 posts.append(post)
                 
@@ -165,6 +186,12 @@ class BaseCrawler:
             # 保存原始帖子信息
             post_filename = f"{i+1:03d}_{clean_title}.json"
             save_json_data(note, os.path.join(self.output_dir, post_filename))
+        
+        # 4. 构建内容索引用于相似度搜索和推荐
+        if posts:
+            print(f"📊 构建内容索引...")
+            self.ai_utils.build_content_index(posts)
+            print(f"✅ 内容索引构建完成，共索引 {len(posts)} 篇帖子")
             
         return posts
     

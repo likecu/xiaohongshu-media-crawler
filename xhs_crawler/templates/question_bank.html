@@ -46,6 +46,70 @@
             font-size: 14px;
         }
         
+        .search-section {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-crawl {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-crawl:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(238, 90, 36, 0.4);
+        }
+        
+        .btn-crawl:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .crawl-status {
+            width: 100%;
+            padding: 12px 16px;
+            background: #fff3e0;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #e65100;
+            display: none;
+        }
+        
+        .crawl-status.show {
+            display: block;
+        }
+        
         .main-content {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -566,6 +630,13 @@
         <header>
             <h1>🤖 大模型面试题库</h1>
             <p>AI智能分类 · 全面覆盖 · 高效刷题</p>
+            <div class="search-section">
+                <input type="text" class="search-input" id="searchKeyword" placeholder="输入关键词（如：Transformer、RLHF、RAG）从小红书爬取相关题目" />
+                <button class="btn-crawl" id="crawlBtn" onclick="startCrawl()">
+                    🔍 爬取题目
+                </button>
+            </div>
+            <div class="crawl-status" id="crawlStatus"></div>
         </header>
         
         <div class="main-content">
@@ -994,6 +1065,63 @@
                 questionBank.currentIndex--;
                 answerVisible = false;
                 renderQuestion();
+            }
+        }
+        
+        function showCrawlStatus(message, isLoading = false) {
+            const statusEl = document.getElementById('crawlStatus');
+            statusEl.innerHTML = isLoading 
+                ? `<span class="loading-spinner" style="display:inline-block;width:16px;height:16px;border:2px solid #e8e8e8;border-top-color:#667eea;border-radius:50%;animation:spin 1s linear infinite;margin-right:8px;vertical-align:middle;"></span>${message}`
+                : message;
+            statusEl.classList.add('show');
+        }
+        
+        function hideCrawlStatus() {
+            document.getElementById('crawlStatus').classList.remove('show');
+        }
+        
+        async function startCrawl() {
+            const keyword = document.getElementById('searchKeyword').value.trim();
+            
+            if (!keyword) {
+                showCrawlStatus('⚠️ 请输入搜索关键词');
+                return;
+            }
+            
+            const crawlBtn = document.getElementById('crawlBtn');
+            crawlBtn.disabled = true;
+            showCrawlStatus(`正在从小红书爬取 "${keyword}" 相关题目...`, true);
+            
+            try {
+                const response = await fetch('/api/question-bank/crawl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        keyword: keyword,
+                        max_pages: 2,
+                        page_size: 10
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 0) {
+                    showCrawlStatus(`✅ 成功爬取 ${data.data.crawled_count} 道新题目！题目总数：${data.data.total_count}`);
+                    await loadQuestions();
+                    
+                    setTimeout(() => {
+                        hideCrawlStatus();
+                    }, 3000);
+                } else {
+                    showCrawlStatus(`❌ 爬取失败：${data.message}`);
+                }
+            } catch (error) {
+                console.error('爬取错误:', error);
+                showCrawlStatus(`❌ 爬取失败：${error.message || '网络错误'}`);
+            } finally {
+                crawlBtn.disabled = false;
             }
         }
         

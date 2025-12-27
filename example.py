@@ -47,6 +47,11 @@ def print_menu():
     print("   - 对帖子内容进行总结")
     print("   - 生成包含总结的HTML网页")
     print()
+    print("5. 🔥 提取热门关键词")
+    print("   - 从小红书搜索结果中提取热门关键词")
+    print("   - 根据帖子热度计算关键词热度分数")
+    print("   - 生成热门关键词排行榜")
+    print()
     print("0. 🚪 退出程序")
     print("=" * 60)
 
@@ -170,6 +175,50 @@ def summarize_posts():
     print("\n" + "=" * 50)
     print("🎉 帖子总结演示结束")
 
+def extract_hot_keywords():
+    """
+    提取热门关键词
+    """
+    print("\n🔥 提取小红书热门关键词")
+    print("=" * 50)
+    try:
+        import os
+        from xhs_crawler.summarizers.hot_keywords import (
+            extract_hot_keywords_from_directory,
+            display_hot_keywords,
+            save_hot_keywords
+        )
+        
+        # 自动检测爬虫输出目录
+        output_dirs = [d for d in os.listdir('.') if os.path.isdir(d) and '帖子' in d]
+        if output_dirs:
+            directory = output_dirs[0]  # 使用第一个找到的目录
+            print(f"🔍 自动检测到爬虫输出目录: {directory}")
+        else:
+            directory = "output"  # 默认目录
+            print(f"ℹ️  未检测到爬虫输出目录，使用默认目录: {directory}")
+        
+        # 提取热门关键词，增加关键词数量
+        hot_keywords = extract_hot_keywords_from_directory(directory=directory, top_n=50)
+        
+        if hot_keywords:
+            # 显示热门关键词
+            display_hot_keywords(hot_keywords)
+            
+            # 保存热门关键词
+            save_hot_keywords(hot_keywords, "hot_keywords.json")
+        else:
+            print("未提取到热门关键词")
+            
+    except ImportError as e:
+        print(f"\n❌ 导入模块失败: {e}")
+        print("💡 提示: 请检查模块路径是否正确")
+    except Exception as e:
+        print(f"\n❌ 提取热门关键词过程中出现错误: {e}")
+    
+    print("\n" + "=" * 50)
+    print("🎉 热门关键词提取演示结束")
+
 def main():
     """
     主函数，按顺序执行所有功能
@@ -181,6 +230,7 @@ def main():
     print("2. 📄 从搜索结果生成完整HTML")
     print("3. 📂 从现有数据生成HTML")
     print("4. 📝 对帖子内容进行总结")
+    print("5. 🔥 提取热门关键词")
     print("=" * 60)
     
     # 按顺序执行所有功能
@@ -203,6 +253,11 @@ def main():
     print("开始执行功能 4: 📝 对帖子内容进行总结")
     print("=" * 60)
     summarize_posts()
+    
+    print("\n\n" + "=" * 60)
+    print("开始执行功能 5: 🔥 提取热门关键词")
+    print("=" * 60)
+    extract_hot_keywords()
     
     print("\n\n" + "=" * 60)
     print("🎉 所有功能执行完成！")
