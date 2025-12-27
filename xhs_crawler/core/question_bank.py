@@ -307,6 +307,66 @@ class QuestionBank:
         }
         return names.get(category, category)
     
+    def _get_default_categories(self) -> Dict[str, Dict[str, Any]]:
+        """
+        获取默认分类定义
+        
+        Returns:
+            默认分类字典，包含分类标签、名称、题目数量和题目列表
+        """
+        return {
+            "transformer": {
+                "name": "Transformer架构",
+                "count": 0,
+                "questions": []
+            },
+            "llm_fundamentals": {
+                "name": "LLM基础理论",
+                "count": 0,
+                "questions": []
+            },
+            "rlhf": {
+                "name": "RLHF与对齐",
+                "count": 0,
+                "questions": []
+            },
+            "rag": {
+                "name": "RAG检索增强",
+                "count": 0,
+                "questions": []
+            },
+            "prompt_engineering": {
+                "name": "提示工程",
+                "count": 0,
+                "questions": []
+            },
+            "deployment": {
+                "name": "模型部署",
+                "count": 0,
+                "questions": []
+            },
+            "coding": {
+                "name": "编程实现",
+                "count": 0,
+                "questions": []
+            },
+            "math": {
+                "name": "数学基础",
+                "count": 0,
+                "questions": []
+            },
+            "nlp": {
+                "name": "NLP知识",
+                "count": 0,
+                "questions": []
+            },
+            "other": {
+                "name": "其他题目",
+                "count": 0,
+                "questions": []
+            }
+        }
+    
     def save(self) -> None:
         """保存题库到文件"""
         print(f"\n💾 保存题库到 {self.output_dir}")
