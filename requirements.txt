@@ -2,4 +2,5 @@
 requests>=2.31.0
 python-dotenv>=1.2.1
 psycopg2-binary>=2.9.11
+flask>=2.3.0
 # 其他依赖都是Python标准库，不需要额外安装
