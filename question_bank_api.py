@@ -442,7 +442,7 @@ def question_bank_page():
         HTML: 刷题页面
     """
     return send_from_directory(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'xhs_crawler', 'templates'),
         'question_bank.html'
     )
 
@@ -456,7 +456,7 @@ def index():
         HTML: 首页
     """
     return send_from_directory(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'xhs_crawler', 'templates'),
         'question_bank.html'
     )
 
