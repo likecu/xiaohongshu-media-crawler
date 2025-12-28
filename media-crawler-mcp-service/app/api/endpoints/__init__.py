@@ -12,6 +12,8 @@ main_app = FastMCP(
 import app.api.endpoints.admin.dashboard_endpoint
 import app.api.endpoints.admin.config_endpoint
 import app.api.endpoints.admin.status_endpoint
+import app.api.endpoints.admin.metrics_endpoint
+import app.api.endpoints.admin.health_endpoint
 import app.api.endpoints.admin.publish_endpoint
 import app.api.endpoints.login.login_endpoint
 

@@ -1,5 +1,6 @@
 # 小红书爬虫项目依赖
 requests>=2.31.0
+httpx>=0.25.0
 python-dotenv>=1.2.1
 psycopg2-binary>=2.9.11
 flask>=2.3.0

@@ -6,10 +6,29 @@
 
 import os
 import json
+import asyncio
 from typing import List, Dict, Any, Optional
 from xhs_crawler.core.mcp_utils import MCPUtils, ensure_directory, save_json_data, clean_filename
 from xhs_crawler.core.ai_utils import AIUtils
 from xhs_crawler.generators.html_generator import generate_html
+
+
+def _run_async(coro):
+    """
+    运行异步协程
+    
+    Args:
+        coro: 协程对象
+        
+    Returns:
+        协程执行结果
+    """
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    return loop.run_until_complete(coro)
 
 
 class BaseCrawler:
@@ -51,11 +70,11 @@ class BaseCrawler:
         """
         print(f"🔍 搜索关键词: '{keywords}'...")
         
-        result = self.mcp_utils.call_mcp_tool("xhs_search", {
+        result = _run_async(self.mcp_utils.call_mcp_tool("xhs_search", {
             "keywords": keywords,
             "page_num": page_num,
             "page_size": page_size
-        })
+        }))
         
         if result.get("code") != 0:
             print(f"❌ 搜索失败: {result.get('msg')}")
@@ -81,11 +100,11 @@ class BaseCrawler:
         """
         print(f"📋 获取帖子详情: {note_id}...")
         
-        result = self.mcp_utils.call_mcp_tool("xhs_crawler_detail", {
+        result = _run_async(self.mcp_utils.call_mcp_tool("xhs_crawler_detail", {
             "note_id": note_id,
             "xsec_token": xsec_token,
             "xsec_source": xsec_source
-        })
+        }))
         
         if result.get("code") != 0:
             print(f"❌ 获取帖子详情失败: {result.get('msg')}")
@@ -114,12 +133,12 @@ class BaseCrawler:
         """
         print(f"💬 获取帖子评论: {note_id}...")
         
-        result = self.mcp_utils.call_mcp_tool("xhs_crawler_comments", {
+        result = _run_async(self.mcp_utils.call_mcp_tool("xhs_crawler_comments", {
             "note_id": note_id,
             "xsec_token": xsec_token,
             "page_num": page_num,
             "page_size": page_size
-        })
+        }))
         
         if result.get("code") != 0:
             print(f"❌ 获取评论失败: {result.get('msg')}")

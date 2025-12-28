@@ -7,7 +7,7 @@ MCP工具调用和公共工具函数
 import os
 import json
 import time
-import requests
+import httpx
 from typing import List, Dict, Any, Optional
 
 class MCPUtils:
@@ -23,8 +23,28 @@ class MCPUtils:
             inspector_url: MCP工具端点URL
         """
         self.inspector_url = inspector_url
+        self._client: Optional[httpx.AsyncClient] = None
     
-    def call_mcp_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_client(self) -> httpx.AsyncClient:
+        """
+        获取异步HTTP客户端
+        
+        Returns:
+            httpx.AsyncClient: 异步HTTP客户端
+        """
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(timeout=30.0)
+        return self._client
+    
+    async def close(self) -> None:
+        """
+        关闭HTTP客户端
+        """
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
+            self._client = None
+    
+    async def call_mcp_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         调用MCP工具
         
@@ -41,17 +61,17 @@ class MCPUtils:
         }
         
         try:
-            response = requests.post(
+            client = await self._get_client()
+            response = await client.post(
                 self.inspector_url,
                 json=data,
-                headers={"Content-Type": "application/json"},
-                timeout=30
+                headers={"Content-Type": "application/json"}
             )
             
             response.raise_for_status()
             result = response.json()
             return result.get("result", {})
-        except requests.exceptions.RequestException as e:
+        except httpx.RequestError as e:
             print(f"❌ MCP工具调用失败: {tool_name}, {e}")
             return {"code": -1, "msg": str(e)}
 

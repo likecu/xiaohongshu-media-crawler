@@ -13,10 +13,16 @@ from app.api.endpoints import main_app, bili_mcp, xhs_mcp
 from app.providers.cache.queue import PublishQueue
 from app.providers.database.pool_manager import get_pool_manager, close_pool_manager
 from app.core.crawler.platforms.xhs.publish import register_xhs_publisher
+from app.core.monitoring.metrics import metrics_collector
 
 
 import asyncio
 from contextlib import asynccontextmanager
+import time
+
+
+# 服务启动时间
+SERVICE_START_TIME = time.time()
 
 # 创建全局发布队列实例
 _publish_queue = PublishQueue()
@@ -60,6 +66,13 @@ def create_app() -> tuple[Any, Any]:
 
         await _publish_queue.start_all()
         logger.info("✅ 发布队列管理器已启动")
+        
+        metrics_collector.update_service_health(
+            service_name="mcp_service",
+            is_up=True,
+            start_time=SERVICE_START_TIME
+        )
+        logger.info("✅ 监控指标收集器已初始化")
 
     asyncio.run(setup_servers())
 
