@@ -13,6 +13,5 @@
   ],
   "page_num": 2,
   "page_size": 20,
-  "crawler_type": "leetcode",
-  "enable_db_storage": true
+  "crawler_type": "leetcode"
 }

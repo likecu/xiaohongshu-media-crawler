@@ -7,8 +7,7 @@
 2. 搜索小红书上关于刷题经验、leetcode、算法练习的帖子
 3. 获取每个帖子的详细内容
 4. 对帖子中的图片进行OCR识别
-5. 将数据存储到数据库中
-6. 生成HTML网页展示所有帖子
+5. 生成HTML网页展示所有帖子
 """
 
 import os
@@ -20,7 +19,7 @@ from datetime import datetime
 from xhs_crawler.core.base_crawler import BaseCrawler
 from xhs_crawler.core.config import get_output_dir, get_html_file_path, DEFAULT_SEARCH_CONFIG, OCR_CONFIG
 from xhs_crawler.core.mcp_utils import load_json_data, save_json_data
-from xhs_crawler.core.database import NeonDatabase
+from xhs_crawler.core.local_database import LocalPostgreSQLDatabase
 
 
 class LeetCodeCrawler(BaseCrawler):
@@ -40,15 +39,21 @@ class LeetCodeCrawler(BaseCrawler):
         self.db = None
         self._init_database()
     
-    def _init_database(self) -> None:
+    def _init_database(self):
         """
-        初始化数据库连接
+        初始化本地数据库连接
         """
         try:
-            self.db = NeonDatabase()
-            print("✅ 数据库连接初始化成功")
+            self.db = LocalPostgreSQLDatabase(
+                host=os.getenv("DB_HOST", "localhost"),
+                port=int(os.getenv("DB_PORT", 5432)),
+                database=os.getenv("DB_NAME", "mcp_tools_db"),
+                user=os.getenv("DB_USER", "postgres"),
+                password=os.getenv("DB_PASSWORD", "password")
+            )
+            print("✅ 刷题爬虫数据库初始化成功")
         except Exception as e:
-            print(f"⚠️  数据库连接初始化失败: {e}")
+            print(f"⚠️ 数据库初始化失败，将跳过数据库存储: {e}")
             self.db = None
     
     def load_config(self) -> Dict[str, Any]:
@@ -300,16 +305,32 @@ class LeetCodeCrawler(BaseCrawler):
         
         question_info = self._extract_question_info(note, detail)
         if question_info:
-            if not self.db.save_interview_question(question_info):
+            if not self.db.insert_interview_question(
+                question_id=question_info['question_id'],
+                content=question_info['content'],
+                answer=question_info.get('answer'),
+                category=question_info.get('category'),
+                difficulty=question_info.get('difficulty'),
+                question_type=question_info.get('question_type'),
+                explanation=question_info.get('explanation'),
+                source=question_info.get('source'),
+                source_url=question_info.get('source_url'),
+                note_id=question_info.get('note_id')
+            ):
                 save_success = False
         
         leetcode_problem = self._extract_leetcode_problem(title, content)
         if leetcode_problem:
-            if not self.db.save_leetcode_problem(
-                problem_id=leetcode_problem['problem_id'],
-                problem_name=leetcode_problem['problem_name'],
-                problem_url=leetcode_problem.get('problem_url'),
-                difficulty=leetcode_problem.get('difficulty')
+            difficulty = self._detect_difficulty(title, content)
+            
+            if not self.db.insert_leetcode_practice(
+                note_id=note_id,
+                title=title,
+                content=content,
+                difficulty=difficulty,
+                question_id=str(leetcode_problem.get('problem_id', '')),
+                question_url=leetcode_problem.get('problem_url'),
+                category='leetcode'
             ):
                 save_success = False
         
