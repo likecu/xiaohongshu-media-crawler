@@ -74,10 +74,10 @@ def create_app() -> tuple[Any, Any]:
     register_prompts(main_app)
     register_resources(main_app)
 
-    # 注册题库页面路由
-    from app.pages.question_bank import register_question_bank_route
-    register_question_bank_route(main_app)
-    logger.info("✅ 题库页面路由已注册")
+    # 注册题库页面路由（暂时禁用，FastMCP 不支持直接注册路由）
+    # from app.pages.question_bank import register_question_bank_route
+    # register_question_bank_route(main_app)
+    # logger.info("✅ 题库页面路由已注册")
 
     logger.info("✅ MCP Prompts 和 Resources 注册成功")
     logger.info("✅ 子服务挂载完成: 小红书MCP(/xhs_), B站MCP(/mcp/bili_)")
